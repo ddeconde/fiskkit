@@ -72,9 +72,10 @@ def regen_data(sentences, n, censored):
     return data, sentences
 
 def write_data_file(outfile_name, data):
-    writer = csv.writer(outfile_name)
-    for row in data:
-        writer.writerow(row)
+    with open(outfile_name, 'wb') as csv_file:
+        writer = csv.writer(csv_file)
+        for row in data:
+            writer.writerow(row)
 
 def censoring(total, proportion):
     return np.random.binomial(total, proportion)
@@ -92,11 +93,10 @@ def main():
     ## Parse arguments when run from CLI ##
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("inputfile", nargs="?", default="none",
-            help="A CSV file specifying tags and associated parameters from a previous run of this script.")
+    parser.add_argument("-i", "--inputfile", default="none")
     parser.add_argument("outputfile", nargs="?", default=sys.stdout,
             help="A filename to which tags and counts will be written in CSV format.")
-    parser.add_argument("-r", "--record",nargs="?",
+    parser.add_argument("-r", "--record", nargs="?",
             const="fiskparams.csv", default="none",
             help="This option alone records randomly generated parameters for tags to the default file 'fiskparams.csv.' When an argument [RECORD] is provided the file will be named {RECORD].")
     parser.add_argument("-p", "--params", nargs=2, type=float,
@@ -128,7 +128,7 @@ def main():
 
     # Either read parameters from file or generate from hyperparameters
 
-    if args.infile != "none":
+    if args.inputfile != "none":
         # when input file is given, pull sentence parameters from there
         sentences = read_param_file(args.inputfile)
         data, params = regen_data(sentences, args.number, args.censor)
